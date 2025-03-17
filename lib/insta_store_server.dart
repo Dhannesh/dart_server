@@ -183,6 +183,8 @@ Future<void> handleRequests(HttpServer server) async {
       case 'DELETE':
         handleDelete(request);
         break;
+      case 'PUT':
+        handlePut(request);
       default:
         handleDefault(request);
     }
@@ -223,6 +225,22 @@ void handleDelete(HttpRequest req) async {
   for (var product in toBeDeletedProducts) {
     products.remove(product);
   }
+  req.response
+    ..write(json.encode(products))
+    ..close();
+}
+
+void handlePut(HttpRequest req) async {
+  var resBody = await utf8.decoder.bind(req).join();
+  var productToEdit = json.decode(resBody);
+
+  for (var product in products) {
+    if (productToEdit.contains(product['id'])) {
+      product['price'] +=
+          double.parse((0.1 * product['price']).toStringAsFixed(2));
+    }
+  }
+
   req.response
     ..write(json.encode(products))
     ..close();
