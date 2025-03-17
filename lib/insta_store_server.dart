@@ -180,6 +180,9 @@ Future<void> handleRequests(HttpServer server) async {
       case 'POST':
         handlePost(request);
         break;
+      case 'DELETE':
+        handleDelete(request);
+        break;
       default:
         handleDefault(request);
     }
@@ -204,6 +207,23 @@ void handlePost(HttpRequest request) async {
   Map<String, dynamic> productToAdd = json.decode(responseBody);
   products.add(productToAdd);
   request.response
+    ..write(json.encode(products))
+    ..close();
+}
+
+void handleDelete(HttpRequest req) async {
+  var resBody = await utf8.decoder.bind(req).join();
+  var productToDelete = json.decode(resBody);
+  var toBeDeletedProducts = [];
+  for (var product in products) {
+    if (productToDelete.contains(product['id'])) {
+      toBeDeletedProducts.add(product);
+    }
+  }
+  for (var product in toBeDeletedProducts) {
+    products.remove(product);
+  }
+  req.response
     ..write(json.encode(products))
     ..close();
 }
